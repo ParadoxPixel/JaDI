@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.AccessLevel;
 import lombok.Getter;
 import nl.iobyte.jadi.objects.ApplicationContext;
 import nl.iobyte.jadi.objects.HierarchyMap;
@@ -11,12 +12,11 @@ import nl.iobyte.jadi.processor.AnnotationProcessor;
 import nl.iobyte.jadi.reflections.Type;
 import nl.iobyte.jadi.reflections.TypeFactory;
 
-@Getter
 @SuppressWarnings({"unused", "unchecked"})
-public class JaDI {
+public class JaDI extends AnnotationProcessor {
 
+    @Getter(AccessLevel.PACKAGE) // Used for Testing
     private final HierarchyMap hierarchyMap = new HierarchyMap();
-    private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
     private final Map<Type<?>, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
 
     /**
@@ -26,16 +26,16 @@ public class JaDI {
      * @param value value
      * @param <T>   type
      */
-    public <T> void bind(Type<T> type, T value) {
+    public synchronized <T> void bind(Type<T> type, T value) {
         assert type != null;
         assert value != null;
 
         hierarchyMap.put(type, value);
         CompletableFuture<T> future = (CompletableFuture<T>) futureMap.remove(type);
-        if(future != null)
-            future.complete(value);
 
         processQueue();
+        if(future != null)
+            future.complete(value);
     }
 
     /**
@@ -45,7 +45,7 @@ public class JaDI {
      * @param <T>  type
      * @return value
      */
-    public <T> CompletableFuture<T> resolve(Type<T> type) {
+    public synchronized <T> CompletableFuture<T> resolve(Type<T> type) {
         assert type != null;
 
         if(hierarchyMap.containsKey(type))
@@ -75,6 +75,9 @@ public class JaDI {
         if(!type.isInstantiable())
             return null;
 
+        if(hierarchyMap.containsKey(type))
+            return (T) hierarchyMap.get(type);
+
         TypeFactory<T> factory = TypeFactory.of(type);
         boolean b = factory.getDependencies().stream().allMatch(hierarchyMap::containsKey);
         if(!b)
@@ -89,7 +92,7 @@ public class JaDI {
         }
 
         // Process annotations
-        annotationProcessor.process(new ApplicationContext(
+        process(new ApplicationContext(
             instance,
             type,
             hierarchyMap::get
