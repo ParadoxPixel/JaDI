@@ -73,7 +73,7 @@ public class Type<T> extends TypeElement<Class<T>> {
      * @return whether the type can be instantiated
      */
     public boolean isInstantiable() {
-        return !(type.isInterface() || Modifier.isAbstract(type.getModifiers()));
+        return !(type.isInterface() || Modifier.isAbstract(type.getModifiers()) || ClassUtils.isPrimitiveOrWrapper(type));
     }
 
     /**

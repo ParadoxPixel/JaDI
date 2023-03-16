@@ -1,8 +1,9 @@
 package nl.iobyte.jadi;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.Getter;
 import nl.iobyte.jadi.objects.ApplicationContext;
 import nl.iobyte.jadi.objects.HierarchyMap;
@@ -11,12 +12,12 @@ import nl.iobyte.jadi.reflections.Type;
 import nl.iobyte.jadi.reflections.TypeFactory;
 
 @Getter
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "unchecked"})
 public class JaDI {
 
     private final HierarchyMap hierarchyMap = new HierarchyMap();
     private final AnnotationProcessor annotationProcessor = new AnnotationProcessor();
-    private final List<Type<?>> queue = new ArrayList<>();
+    private final Map<Type<?>, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
 
     /**
      * Bind value to type
@@ -30,6 +31,11 @@ public class JaDI {
         assert value != null;
 
         hierarchyMap.put(type, value);
+        CompletableFuture<T> future = (CompletableFuture<T>) futureMap.remove(type);
+        if(future != null)
+            future.complete(value);
+
+        processQueue();
     }
 
     /**
@@ -39,28 +45,23 @@ public class JaDI {
      * @param <T>  type
      * @return value
      */
-    public <T> T resolve(Type<T> type) {
+    public <T> CompletableFuture<T> resolve(Type<T> type) {
         assert type != null;
 
         if(hierarchyMap.containsKey(type))
-            //noinspection unchecked
-            return (T) hierarchyMap.get(type);
+            return CompletableFuture.completedFuture((T) hierarchyMap.get(type));
 
-        T instance;
-        synchronized(queue) {
-            instance = instantiate(type);
-            if(instance == null) {
-                if(!queue.contains(type))
-                    queue.add(type);
+        T instance = instantiate(type);
+        if(instance == null)
+            return (CompletableFuture<T>) futureMap.computeIfAbsent(type, key -> new CompletableFuture<>());
 
-                return null;
-            }
-
-            queue.remove(type);
-        }
+        CompletableFuture<T> future = (CompletableFuture<T>) futureMap.remove(type);
+        if(future == null)
+            future = new CompletableFuture<>();
 
         processQueue();
-        return instance;
+        future.complete(instance);
+        return future;
     }
 
     /**
@@ -100,18 +101,22 @@ public class JaDI {
      * Attempt to instantiate types in queue
      */
     private void processQueue() {
-        synchronized(queue) {
-            Iterator<Type<?>> it = queue.iterator();
-            while(it.hasNext()) {
-                // Try to resolve type
-                Object instance = instantiate(it.next());
-                if(instance == null)
-                    continue;
+        Iterator<Type<?>> it = futureMap.keySet().iterator();
+        while(it.hasNext()) {
+            // Try to resolve type
+            Type<?> type = it.next();
+            Object instance = instantiate(type);
+            if(instance == null)
+                continue;
 
-                // Remove resolved type and restart iterator
-                it.remove();
-                it = queue.iterator();
-            }
+            CompletableFuture<Object> future = (CompletableFuture<Object>) futureMap.get(type);
+            it.remove();
+
+            if(future != null)
+                future.complete(instance);
+
+            // Restart iterator
+            it = futureMap.keySet().iterator();
         }
     }
 
