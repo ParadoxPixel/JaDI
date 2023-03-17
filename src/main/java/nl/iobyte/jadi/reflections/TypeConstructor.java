@@ -1,12 +1,12 @@
 package nl.iobyte.jadi.reflections;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString
@@ -17,7 +17,7 @@ public class TypeConstructor<T> extends TypeElement<Constructor<T>> {
     private final Type<T> type;
 
     /**
-     * Type Constructor
+     * Type Constructor.
      *
      * @param constructor reflection constructor
      * @param type        instance type
@@ -31,7 +31,7 @@ public class TypeConstructor<T> extends TypeElement<Constructor<T>> {
     }
 
     /**
-     * Get parameter types of constructor
+     * Get parameter types of constructor.
      *
      * @return list of parameter types
      */
@@ -42,7 +42,7 @@ public class TypeConstructor<T> extends TypeElement<Constructor<T>> {
     }
 
     /**
-     * Get a new instance of the type
+     * Get a new instance of the type.
      *
      * @param values array of values to pass to constructor
      * @return new instance

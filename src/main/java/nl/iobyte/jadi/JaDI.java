@@ -24,7 +24,7 @@ public class JaDI extends AnnotationProcessor {
     private final Map<Type<?>, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
 
     /**
-     * Bind value to type
+     * Bind value to type.
      *
      * @param type  type
      * @param value value
@@ -43,7 +43,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Resolve type value
+     * Resolve type value.
      *
      * @param type type
      * @param <T>  type
@@ -73,7 +73,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Attempt to resolve type within duration else return null
+     * Attempt to resolve type within duration else return null.
      *
      * @param type     type
      * @param duration timeout
@@ -92,7 +92,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Instantiate type
+     * Instantiate type.
      *
      * @param type type to instantiate
      * @param <T>  type
@@ -128,7 +128,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Attempt to instantiate types in queue
+     * Attempt to instantiate types in queue.
      */
     private void processQueue() {
         Iterator<Type<?>> it = futureMap.keySet().iterator();

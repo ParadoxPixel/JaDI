@@ -1,12 +1,12 @@
 package nl.iobyte.jadi.reflections;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString
@@ -17,7 +17,7 @@ public class TypeMethod extends TypeElement<Method> {
     private final Type<?> type;
 
     /**
-     * Type Method
+     * Type Method.
      *
      * @param method reflection method
      * @param type   instance type
@@ -31,7 +31,7 @@ public class TypeMethod extends TypeElement<Method> {
     }
 
     /**
-     * Get parameter types of constructor
+     * Get parameter types of constructor.
      *
      * @return list of parameter types
      */
@@ -42,7 +42,7 @@ public class TypeMethod extends TypeElement<Method> {
     }
 
     /**
-     * Set the value of the field for a specific instance
+     * Set the value of the field for a specific instance.
      *
      * @param instance type instance
      * @param values   array of values to pass to constructor
