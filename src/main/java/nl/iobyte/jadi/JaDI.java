@@ -1,14 +1,18 @@
 package nl.iobyte.jadi;
 
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import lombok.AccessLevel;
 import lombok.Getter;
-import nl.iobyte.jadi.objects.ApplicationContext;
 import nl.iobyte.jadi.objects.HierarchyMap;
 import nl.iobyte.jadi.processor.AnnotationProcessor;
+import nl.iobyte.jadi.processor.objects.ProcessContext;
 import nl.iobyte.jadi.reflections.Type;
 import nl.iobyte.jadi.reflections.TypeFactory;
 
@@ -35,7 +39,7 @@ public class JaDI extends AnnotationProcessor {
 
         processQueue();
         if(future != null)
-            future.complete(value);
+            ForkJoinPool.commonPool().execute(() -> future.complete(value));
     }
 
     /**
@@ -55,13 +59,36 @@ public class JaDI extends AnnotationProcessor {
         if(instance == null)
             return (CompletableFuture<T>) futureMap.computeIfAbsent(type, key -> new CompletableFuture<>());
 
-        CompletableFuture<T> future = (CompletableFuture<T>) futureMap.remove(type);
-        if(future == null)
-            future = new CompletableFuture<>();
+        CompletableFuture<T> future = Optional.ofNullable(
+            (CompletableFuture<T>) futureMap.remove(type)
+        ).map(f -> {
+            ForkJoinPool.commonPool().execute(() -> f.complete(instance));
+            return f;
+        }).orElseGet(() -> CompletableFuture.completedFuture(instance));
 
         processQueue();
-        future.complete(instance);
+
+        // Complete future
         return future;
+    }
+
+    /**
+     * Attempt to resolve type within duration else return null
+     *
+     * @param type     type
+     * @param duration timeout
+     * @param <T>      type
+     * @return type instance or null
+     */
+    public <T> T resolve(Type<T> type, Duration duration) {
+        try {
+            return resolve(type).get(
+                duration.toMillis(),
+                TimeUnit.MILLISECONDS
+            );
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -92,7 +119,7 @@ public class JaDI extends AnnotationProcessor {
         }
 
         // Process annotations
-        process(new ApplicationContext(
+        process(new ProcessContext(
             instance,
             type,
             hierarchyMap::get

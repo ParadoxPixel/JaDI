@@ -1,9 +1,8 @@
 package nl.iobyte.jadi;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import nl.iobyte.jadi.processor.objects.DummyClass;
 import nl.iobyte.jadi.reflections.Type;
 import org.junit.jupiter.api.Assertions;
@@ -37,9 +36,9 @@ class JaDITest {
     }
 
     @Test
-    void resolveFactory() throws ExecutionException, InterruptedException, TimeoutException {
-        Assertions.assertDoesNotThrow(() -> jadi.resolve(Type.of(DummyClass.class)).get(1, TimeUnit.SECONDS));
-        Assertions.assertNotNull(jadi.resolve(Type.of(DummyClass.class)).get(1, TimeUnit.SECONDS));
+    void resolveFactory() {
+        Assertions.assertDoesNotThrow(() -> jadi.resolve(Type.of(DummyClass.class), Duration.ofSeconds(1)));
+        Assertions.assertNotNull(jadi.resolve(Type.of(DummyClass.class), Duration.ofSeconds(1)));
     }
 
 }
