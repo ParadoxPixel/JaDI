@@ -1,0 +1,5 @@
+![](https://img.shields.io/github/actions/workflow/status/ParadoxPixel/JaDI/maven.yml "build")
+![](https://img.shields.io/github/license/ParadoxPixel/JaDI "license")
+![](https://img.shields.io/github/v/release/ParadoxPixel/JaDI "release")
+![](https://img.shields.io/github/downloads/ParadoxPixel/JaDI/total "downloads")
+![](https://img.shields.io/badge/java-19-green)
