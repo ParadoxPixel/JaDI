@@ -93,7 +93,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Get new instance of type with parameters
+     * Get new instance of type with parameters.
      *
      * @param type   type
      * @param values parameters

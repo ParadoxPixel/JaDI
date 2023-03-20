@@ -44,7 +44,7 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
     }
 
     /**
-     * Get the closest type found in map
+     * Get the closest type found in map.
      *
      * @param type type
      * @return type
