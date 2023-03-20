@@ -23,29 +23,11 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
      * @return value
      */
     private Object getInternal(Type<?> type) {
-        Object value = super.get(type);
-        if(value != null)
-            return value;
+        type = getClosestType(type);
+        if(type == null)
+            return null;
 
-        // Get assignable keys
-        List<Type<?>> assignableKeys = keySet().stream()
-            .filter(type::isAssignable)
-            .toList();
-
-        int distance = Integer.MAX_VALUE;
-        Type<?> closestType = null;
-        for(Type<?> assignableKey : assignableKeys) {
-            int i = assignableKey.getHierarchyDepth(type);
-            if(i == -1)
-                continue;
-
-            if(i < distance) {
-                distance = i;
-                closestType = assignableKey;
-            }
-        }
-
-        return closestType == null ? null : super.get(closestType);
+        return super.get(type);
     }
 
     /**
@@ -59,6 +41,38 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
             return true;
 
         return keySet().stream().anyMatch(type::isAssignable);
+    }
+
+    /**
+     * Get the closest type found in map
+     *
+     * @param type type
+     * @return type
+     */
+    public Type<?> getClosestType(Type<?> type) {
+        if(super.containsKey(type))
+            return type;
+
+        // Get assignable keys
+        List<Type<?>> assignableKeys = keySet().stream()
+            .filter(type::isAssignable)
+            .toList();
+
+        // Get the closest type
+        int distance = Integer.MAX_VALUE;
+        Type<?> closestType = null;
+        for(Type<?> assignableKey : assignableKeys) {
+            int i = assignableKey.getHierarchyDepth(type);
+            if(i == -1)
+                continue;
+
+            if(i < distance) {
+                distance = i;
+                closestType = assignableKey;
+            }
+        }
+
+        return closestType;
     }
 
 }
