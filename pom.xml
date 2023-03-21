@@ -6,7 +6,7 @@
 
   <groupId>nl.iobyte</groupId>
   <artifactId>jadi</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.1</version>
 
   <properties>
     <javaVersion>19</javaVersion>
