@@ -29,7 +29,7 @@ public class AnnotationProcessor {
     private final Map<Class<? extends Annotation>, MethodProcessorGroup<?>> methodProcessorMap = new ConcurrentHashMap<>();
 
     /**
-     * Register processors for annotation by the {@link Processors} annotation.
+     * Register processors for annotation by the {@link Processors} annotation
      *
      * @param type annotation type
      * @param <T>  type
@@ -42,7 +42,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Register base processor.
+     * Register base processor
      *
      * @param type processor type
      * @param <T>  annotation type
@@ -65,7 +65,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Register type processor.
+     * Register type processor
      *
      * @param type type processor type
      * @param <T>  annotation type
@@ -83,7 +83,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Register field processor.
+     * Register field processor
      *
      * @param type field processor type
      * @param <T>  annotation type
@@ -101,7 +101,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Register method processor.
+     * Register method processor
      *
      * @param type method processor type
      * @param <T>  annotation type
@@ -119,7 +119,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Get (and register if not exists) processor by type.
+     * Get (and register if not exists) processor by type
      *
      * @param type processor type
      * @param <T>  annotation type
@@ -138,7 +138,7 @@ public class AnnotationProcessor {
     }
 
     /**
-     * Process context with provided process types.
+     * Process context with provided process types
      *
      * @param ctx process context
      */

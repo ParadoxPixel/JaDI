@@ -27,7 +27,9 @@
 
     <!-- Javadocs -->
     <module name="JavadocMethod"/>
-    <module name="JavadocStyle"/>
+    <module name="JavadocStyle">
+      <property name="checkFirstSentence" value="false"/>
+    </module>
     <module name="MethodLength">
       <property name="max" value="50"/>
     </module>

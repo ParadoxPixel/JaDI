@@ -7,7 +7,7 @@ import nl.iobyte.jadi.reflections.Type;
 public interface TypeProcessor<T extends Annotation> extends BaseProcessor<T> {
 
     /**
-     * Process annotation for type.
+     * Process annotation for type
      *
      * @param ctx        process context
      * @param type       type to process

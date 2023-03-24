@@ -21,9 +21,16 @@ class JaDITest {
 
     @Test
     void bind() {
-        Assertions.assertEquals(0, jadi.getHierarchyMap().size());
+        int initial = jadi.getHierarchyMap().size();
         jadi.bind(Type.of(boolean.class), false);
-        Assertions.assertEquals(1, jadi.getHierarchyMap().size());
+        Assertions.assertEquals(initial + 1, jadi.getHierarchyMap().size());
+    }
+
+    @Test
+    void resolveSelf() throws ExecutionException, InterruptedException {
+        JaDI obj = jadi.resolve(Type.of(JaDI.class)).get();
+        Assertions.assertNotNull(obj);
+        Assertions.assertEquals(jadi, obj);
     }
 
     @Test

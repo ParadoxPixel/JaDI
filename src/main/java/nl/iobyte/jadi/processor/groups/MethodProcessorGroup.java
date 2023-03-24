@@ -11,7 +11,7 @@ import nl.iobyte.jadi.reflections.Type;
 public final class MethodProcessorGroup<T extends Annotation> extends AbstractProcessorGroup<T, MethodProcessor<T>> {
 
     /**
-     * Method Processor Group.
+     * Method Processor Group
      *
      * @param type annotation type
      */

@@ -11,7 +11,7 @@ import nl.iobyte.jadi.processor.interfaces.BaseProcessor;
 public @interface Processors {
 
     /**
-     * Processors for annotation.
+     * Processors for annotation
      *
      * @return array of processor types
      */

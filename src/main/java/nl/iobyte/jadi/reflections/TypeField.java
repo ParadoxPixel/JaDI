@@ -15,7 +15,7 @@ public class TypeField extends TypeElement<Field> {
     private final Type<?> valueType;
 
     /**
-     * Type Field.
+     * Type Field
      *
      * @param field reflection field
      * @param type  instance type
@@ -30,7 +30,7 @@ public class TypeField extends TypeElement<Field> {
     }
 
     /**
-     * Set the value of the field for a specific instance.
+     * Set the value of the field for a specific instance
      *
      * @param instance type instance
      * @param value    new value
