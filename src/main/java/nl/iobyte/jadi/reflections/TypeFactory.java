@@ -70,6 +70,34 @@ public class TypeFactory<T> {
     }
 
     /**
+     * Create a new instance of type with type resolves and parameters
+     *
+     * @param typeResolver type -> instance resolver
+     * @param values       objects to use/prioritise for resolving
+     * @return new type instance
+     */
+    public T create(TypeResolver typeResolver, Object... values) {
+        return create(type -> {
+            int distance = Integer.MAX_VALUE;
+            Object closestValue = null;
+
+            for(Object value : values) {
+                Type<?> valueType = Type.of(value.getClass());
+                int i = valueType.getHierarchyDepth(type);
+                if(i == -1)
+                    continue;
+
+                if(i <= distance) {
+                    distance = i;
+                    closestValue = value;
+                }
+            }
+
+            return closestValue == null ? typeResolver.apply(type) : closestValue;
+        });
+    }
+
+    /**
      * Get type factory of type
      *
      * @param type type
