@@ -21,7 +21,7 @@ public class TypeFactory<T> {
     private final List<TypeMethod> methods;
 
     /**
-     * Get type factory's dependencies.
+     * Get type factory's dependencies
      *
      * @return list of types
      */
@@ -35,7 +35,7 @@ public class TypeFactory<T> {
     }
 
     /**
-     * Create a new instance of type with type resolves.
+     * Create a new instance of type with type resolves
      *
      * @param typeResolver type -> instance resolver
      * @return new type instance
@@ -70,7 +70,7 @@ public class TypeFactory<T> {
     }
 
     /**
-     * Get type factory of type.
+     * Get type factory of type
      *
      * @param type type
      * @param <T>  type

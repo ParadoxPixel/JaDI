@@ -17,7 +17,7 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
     }
 
     /**
-     * Get the closest hierarchical type's value.
+     * Get the closest hierarchical type's value
      *
      * @param type type
      * @return value
@@ -49,7 +49,7 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
     }
 
     /**
-     * Check if type can be mapped.
+     * Check if type can be mapped
      *
      * @param type type
      * @return whether it can be mapped or not

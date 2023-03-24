@@ -20,7 +20,7 @@ public abstract sealed class AbstractProcessorGroup<T extends Annotation, P exte
     private final Class<T> type;
 
     /**
-     * Add processor to group.
+     * Add processor to group
      *
      * @param processor processor instance
      */
@@ -31,7 +31,7 @@ public abstract sealed class AbstractProcessorGroup<T extends Annotation, P exte
     }
 
     /**
-     * Process context with processors in group.
+     * Process context with processors in group
      *
      * @param ctx process context
      */
@@ -46,7 +46,7 @@ public abstract sealed class AbstractProcessorGroup<T extends Annotation, P exte
     }
 
     /**
-     * Get list of consumers to process annotation from type.
+     * Get list of consumers to process annotation from type
      *
      * @param type type to get processors for
      * @return list of annotation consumers

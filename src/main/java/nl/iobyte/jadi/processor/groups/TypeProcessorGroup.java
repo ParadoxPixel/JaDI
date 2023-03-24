@@ -11,7 +11,7 @@ import nl.iobyte.jadi.reflections.Type;
 public final class TypeProcessorGroup<T extends Annotation> extends AbstractProcessorGroup<T, TypeProcessor<T>> {
 
     /**
-     * Type Processor Group.
+     * Type Processor Group
      *
      * @param type annotation type
      */
@@ -28,7 +28,7 @@ public final class TypeProcessorGroup<T extends Annotation> extends AbstractProc
     public List<Consumer<ProcessContext>> processors(Type<?> type) {
         if(!type.hasAnnotation(getType()))
             return Collections.emptyList();
-        
+
         return set.stream()
             .map(processor -> (Consumer<ProcessContext>) ctx -> processor.process(
                 ctx,

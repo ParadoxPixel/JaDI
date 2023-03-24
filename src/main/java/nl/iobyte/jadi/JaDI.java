@@ -20,11 +20,20 @@ import nl.iobyte.jadi.reflections.TypeFactory;
 public class JaDI extends AnnotationProcessor {
 
     @Getter(AccessLevel.PACKAGE) // Used for Testing
-    private final HierarchyMap hierarchyMap = new HierarchyMap();
-    private final Map<Type<?>, CompletableFuture<?>> futureMap = new ConcurrentHashMap<>();
+    private final HierarchyMap hierarchyMap;
+    private final Map<Type<?>, CompletableFuture<?>> futureMap;
 
     /**
-     * Bind value to type.
+     * Java Dependency Injector
+     */
+    public JaDI() {
+        this.hierarchyMap = new HierarchyMap();
+        this.futureMap = new ConcurrentHashMap<>();
+        this.bind(Type.of(JaDI.class), this);
+    }
+
+    /**
+     * Bind value to type
      *
      * @param type  type
      * @param value value
@@ -43,7 +52,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Resolve type value.
+     * Resolve type value
      *
      * @param type type
      * @param <T>  type
@@ -73,7 +82,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Attempt to resolve type within duration else return null.
+     * Attempt to resolve type within duration else return null
      *
      * @param type     type
      * @param duration timeout
@@ -92,7 +101,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Instantiate type.
+     * Instantiate type
      *
      * @param type type to instantiate
      * @param <T>  type
@@ -128,7 +137,7 @@ public class JaDI extends AnnotationProcessor {
     }
 
     /**
-     * Attempt to instantiate types in queue.
+     * Attempt to instantiate types in queue
      */
     private void processQueue() {
         Iterator<Type<?>> it = futureMap.keySet().iterator();

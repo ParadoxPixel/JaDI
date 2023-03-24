@@ -5,7 +5,7 @@ import java.lang.annotation.Annotation;
 public interface BaseProcessor<T extends Annotation> {
 
     /**
-     * Get type of annotation.
+     * Get type of annotation
      *
      * @return type
      */

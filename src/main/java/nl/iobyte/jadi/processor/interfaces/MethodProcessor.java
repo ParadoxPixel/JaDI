@@ -7,7 +7,7 @@ import nl.iobyte.jadi.reflections.TypeMethod;
 public interface MethodProcessor<T extends Annotation> extends BaseProcessor<T> {
 
     /**
-     * Process annotation for field.
+     * Process annotation for field
      *
      * @param ctx        process context
      * @param method     method to process

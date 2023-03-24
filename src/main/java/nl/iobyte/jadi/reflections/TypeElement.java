@@ -16,7 +16,7 @@ public class TypeElement<T extends AnnotatedElement> {
     private final T elem;
 
     /**
-     * Check if element has annotation.
+     * Check if element has annotation
      *
      * @param type annotation type
      * @return whether the element has the annotation or not
@@ -26,7 +26,7 @@ public class TypeElement<T extends AnnotatedElement> {
     }
 
     /**
-     * Get annotation instance by type.
+     * Get annotation instance by type
      *
      * @param type annotation type
      * @param <R>  type

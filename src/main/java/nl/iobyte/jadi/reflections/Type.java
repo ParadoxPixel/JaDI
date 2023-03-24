@@ -37,7 +37,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get optional type of super class.
+     * Get optional type of super class
      *
      * @return optional type
      */
@@ -46,7 +46,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get list of all directly implemented interface types.
+     * Get list of all directly implemented interface types
      *
      * @return list of interface types
      */
@@ -57,7 +57,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get all super types.
+     * Get all super types
      *
      * @return list of super types
      */
@@ -68,7 +68,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Check if type can be instantiated.
+     * Check if type can be instantiated
      *
      * @return whether the type can be instantiated
      */
@@ -83,7 +83,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Check if type is assignable to this type.
+     * Check if type is assignable to this type
      *
      * @param type type to check
      * @return whether the provided type is assignable to this type
@@ -95,7 +95,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Check whether an object is assignable to this type.
+     * Check whether an object is assignable to this type
      *
      * @param obj object to check for
      * @return whether it can be assigned to this type
@@ -105,7 +105,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get hierarchy depth until type.
+     * Get hierarchy depth until type
      *
      * @param type parent type
      * @return depth
@@ -125,7 +125,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get type fields that satisfy filters.
+     * Get type fields that satisfy filters
      *
      * @param filters array of predicates to filter fields
      * @return list of type fields
@@ -148,7 +148,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get type constructors that satisfy filters.
+     * Get type constructors that satisfy filters
      *
      * @param filters array of predicates to filter constructors
      * @return list of type constructors
@@ -173,7 +173,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get type methods that satisfy filters.
+     * Get type methods that satisfy filters
      *
      * @param filters array of predicates to filter methods
      * @return list of type methods
@@ -196,7 +196,7 @@ public class Type<T> extends TypeElement<Class<T>> {
     }
 
     /**
-     * Get wrapped type.
+     * Get wrapped type
      *
      * @param originalType type to wrap
      * @param <T>          type
