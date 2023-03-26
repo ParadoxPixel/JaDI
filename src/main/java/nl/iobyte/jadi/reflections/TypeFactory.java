@@ -2,11 +2,14 @@ package nl.iobyte.jadi.reflections;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nl.iobyte.jadi.annotations.Assisted;
+import nl.iobyte.jadi.annotations.AssistedInject;
 import nl.iobyte.jadi.annotations.Inject;
 import nl.iobyte.jadi.annotations.PostConstruct;
 import nl.iobyte.jadi.interfaces.TypeResolver;
@@ -27,9 +30,43 @@ public class TypeFactory<T> {
      */
     public List<Type<?>> getDependencies() {
         return Stream.of(
-                constructor.getParameterTypes().stream(),
-                fields.stream().map(TypeField::getValueType),
-                methods.stream().flatMap(method -> method.getParameterTypes().stream())
+                constructor.getParameters()
+                    .stream()
+                    .filter(p -> !p.hasAnnotation(AssistedInject.class))
+                    .map(TypeParameter::getType),
+                fields.stream()
+                    .filter(f -> !f.hasAnnotation(AssistedInject.class))
+                    .map(TypeField::getValueType),
+                methods.stream()
+                    .flatMap(
+                        method -> method.getParameterTypes()
+                            .stream()
+                            .filter(p -> !p.hasAnnotation(AssistedInject.class))
+                    )
+            ).flatMap(s -> s)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Get all types of assisted dependencies.
+     *
+     * @return list of types
+     */
+    public List<Type<?>> getAssistedDependencies() {
+        return Stream.of(
+                constructor.getParameters()
+                    .stream()
+                    .filter(p -> p.hasAnnotation(AssistedInject.class))
+                    .map(TypeParameter::getType),
+                fields.stream()
+                    .filter(f -> f.hasAnnotation(AssistedInject.class))
+                    .map(TypeField::getValueType),
+                methods.stream()
+                    .flatMap(
+                        method -> method.getParameterTypes()
+                            .stream()
+                            .filter(p -> p.hasAnnotation(AssistedInject.class))
+                    )
             ).flatMap(s -> s)
             .collect(Collectors.toList());
     }
@@ -38,12 +75,27 @@ public class TypeFactory<T> {
      * Create a new instance of type with type resolves
      *
      * @param typeResolver type -> instance resolver
+     * @param values       array of assisted values
      * @return new type instance
      */
-    public T create(TypeResolver typeResolver) {
-        Object[] constructorValues = constructor.getParameterTypes()
+    public T create(TypeResolver typeResolver, Object... values) {
+        Object[] finalValues = Optional.ofNullable(values).orElse(new Object[0]);
+        TypeResolver assistedInject = type -> {
+            for(Object value : finalValues)
+                if(!type.noInstance(value))
+                    return value;
+
+            throw new IllegalStateException("no value found for assisted inject");
+        };
+
+        Object[] constructorValues = constructor.getParameters()
             .stream()
-            .map(typeResolver)
+            .map(p -> {
+                if(!p.hasAnnotation(AssistedInject.class))
+                    return typeResolver.apply(p.getType());
+
+                return assistedInject.apply(p.getType());
+            })
             .toArray(Object[]::new);
 
         T instance = constructor.newInstance(constructorValues);
@@ -53,48 +105,25 @@ public class TypeFactory<T> {
         // Inject fields
         fields.forEach(field -> field.set(
             instance,
-            typeResolver.apply(field.getValueType())
+            (field.hasAnnotation(AssistedInject.class) ? assistedInject : typeResolver).apply(field.getValueType())
         ));
 
         // Run methods
         methods.forEach(method -> {
             Object[] methodValues = method.getParameterTypes()
                 .stream()
-                .map(typeResolver)
+                .map(type -> {
+                    if(!type.hasAnnotation(AssistedInject.class))
+                        return typeResolver.apply(type);
+
+                    return assistedInject.apply(type);
+                })
                 .toArray(Object[]::new);
 
             method.invoke(instance, methodValues);
         });
 
         return instance;
-    }
-
-    /**
-     * Create a new instance of type with type resolves and parameters
-     *
-     * @param typeResolver type -> instance resolver
-     * @param values       objects to use/prioritise for resolving
-     * @return new type instance
-     */
-    public T create(TypeResolver typeResolver, Object... values) {
-        return create(type -> {
-            int distance = Integer.MAX_VALUE;
-            Object closestValue = null;
-
-            for(Object value : values) {
-                Type<?> valueType = Type.of(value.getClass());
-                int i = valueType.getHierarchyDepth(type);
-                if(i == -1)
-                    continue;
-
-                if(i <= distance) {
-                    distance = i;
-                    closestValue = value;
-                }
-            }
-
-            return closestValue == null ? typeResolver.apply(type) : closestValue;
-        });
     }
 
     /**
@@ -105,15 +134,37 @@ public class TypeFactory<T> {
      * @return type factory
      */
     public static <T> TypeFactory<T> of(Type<T> type) {
-        TypeConstructor<T> constructor = type.getConstructors(c -> true)
-            .stream()
-            .max(Comparator.comparingInt(o -> o.getConstructor().getParameterCount()))
-            .orElseThrow();
-
-        List<TypeField> fields = type.getFields(field -> field.hasAnnotation(Inject.class));
+        TypeConstructor<T> constructor = getConstructor(type);
+        List<TypeField> fields = type.getFields(field -> field.hasAnnotation(Inject.class) || field.hasAnnotation(AssistedInject.class));
         List<TypeMethod> methods = type.getMethods(method -> method.hasAnnotation(PostConstruct.class));
 
         return new TypeFactory<>(type, constructor, fields, methods);
+    }
+
+    /**
+     * Get type constructor from type
+     *
+     * @param type type
+     * @param <T>  type
+     * @return type constructor
+     */
+    private static <T> TypeConstructor<T> getConstructor(Type<T> type) {
+        List<TypeConstructor<T>> constructors = type.getConstructors(c -> true);
+        if(constructors.size() == 1)
+            return constructors.get(0);
+
+        if(constructors.size() == 2) {
+            if(constructors.stream().anyMatch(c -> c.getParameterCount() == 0))
+                return constructors.stream()
+                    .filter(c -> c.getParameterCount() != 0)
+                    .findAny()
+                    .orElseThrow();
+        }
+
+        return constructors.stream()
+            .filter(c -> c.hasAnnotation(Assisted.class))
+            .max(Comparator.comparingInt(o -> o.getConstructor().getParameterCount()))
+            .orElseThrow(() -> new IllegalArgumentException(type.getOriginalType() + " needs assisted constructor"));
     }
 
 }

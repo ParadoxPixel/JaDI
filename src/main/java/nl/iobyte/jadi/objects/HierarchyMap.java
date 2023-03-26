@@ -2,10 +2,17 @@ package nl.iobyte.jadi.objects;
 
 import java.util.HashMap;
 import java.util.List;
+import nl.iobyte.jadi.interfaces.TypeResolver;
 import nl.iobyte.jadi.reflections.Type;
 
-public class HierarchyMap extends HashMap<Type<?>, Object> {
+public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolver {
 
+    /**
+     * Get the closest instance of type
+     *
+     * @param key type
+     * @return type instance
+     */
     @Override
     public synchronized Object get(Object key) {
         return getInternal((Type<?>) key);
@@ -73,6 +80,11 @@ public class HierarchyMap extends HashMap<Type<?>, Object> {
         }
 
         return closestType;
+    }
+
+    @Override
+    public synchronized Object apply(Type<?> type) {
+        return this.getInternal(type);
     }
 
 }

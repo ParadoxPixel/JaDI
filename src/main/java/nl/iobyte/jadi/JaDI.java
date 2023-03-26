@@ -1,7 +1,6 @@
 package nl.iobyte.jadi;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
@@ -101,27 +100,7 @@ public class JaDI extends AnnotationProcessor {
         }
     }
 
-    /**
-     * Get new instance of type with parameters
-     *
-     * @param type   type
-     * @param values parameters
-     * @param <T>    type
-     * @return new type instance
-     */
-    public synchronized <T> T build(Type<T> type, Object... values) {
-        TypeFactory<T> factory = TypeFactory.of(type);
-        boolean b = factory.getDependencies().stream().allMatch(dependency -> {
-            if(hierarchyMap.containsKey(dependency))
-                return true;
-
-            return Arrays.stream(values).anyMatch(obj -> !dependency.noInstance(obj));
-        });
-        if(!b)
-            return null;
-
-        return factory.create(hierarchyMap::get, values);
-    }
+    //TODO Build/Get factory and provide values to resolve
 
     /**
      * Instantiate type
@@ -143,7 +122,7 @@ public class JaDI extends AnnotationProcessor {
             return null;
 
         // Get instance
-        T instance = factory.create(hierarchyMap::get);
+        T instance = factory.create(hierarchyMap);
         if(instance != null) {
             hierarchyMap.put(type, instance);
         } else {
@@ -154,7 +133,7 @@ public class JaDI extends AnnotationProcessor {
         process(new ProcessContext(
             instance,
             type,
-            hierarchyMap::get
+            hierarchyMap
         ));
         return instance;
     }

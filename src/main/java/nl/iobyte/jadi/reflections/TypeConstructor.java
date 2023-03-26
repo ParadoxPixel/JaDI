@@ -3,7 +3,7 @@ package nl.iobyte.jadi.reflections;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -31,14 +31,23 @@ public class TypeConstructor<T> extends TypeElement<Constructor<T>> {
     }
 
     /**
-     * Get parameter types of constructor
+     * Get parameter count
      *
-     * @return list of parameter types
+     * @return amount
      */
-    public List<Type<?>> getParameterTypes() {
-        return Arrays.stream(constructor.getParameterTypes())
-            .map(Type::of)
-            .collect(Collectors.toList());
+    public int getParameterCount() {
+        return constructor.getParameterCount();
+    }
+
+    /**
+     * Get parameters of constructor
+     *
+     * @return list of type parameters
+     */
+    public List<TypeParameter> getParameters() {
+        return Arrays.stream(constructor.getParameters())
+            .map(TypeParameter::new)
+            .toList();
     }
 
     /**
@@ -48,9 +57,7 @@ public class TypeConstructor<T> extends TypeElement<Constructor<T>> {
      * @return new instance
      */
     public T newInstance(Object... values) {
-        if(values == null)
-            values = new Object[0];
-
+        values = Optional.ofNullable(values).orElse(new Object[0]);
         if(constructor.getParameterCount() != values.length)
             throw new IllegalArgumentException("expected " + constructor.getParameterCount() + " parameters got " + values.length);
 
