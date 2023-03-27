@@ -1,7 +1,8 @@
 package nl.iobyte.jadi.reflections;
 
+import java.util.HashMap;
 import java.util.List;
-import nl.iobyte.jadi.objects.HierarchyMap;
+import java.util.Map;
 import nl.iobyte.jadi.reflections.objects.DummyClass;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,22 +35,22 @@ class TypeFactoryTest {
 
     @Test
     void createMissingAssisted() {
-        HierarchyMap map = new HierarchyMap();
+        Map<Type<?>, Object> map = new HashMap<>();
         map.put(Type.of(boolean.class), true);
         map.put(Type.of(String.class), "some thing");
         map.put(Type.of(int.class), 42);
 
-        Assertions.assertThrowsExactly(IllegalStateException.class, () -> factory.create(map));
+        Assertions.assertThrowsExactly(IllegalStateException.class, () -> factory.create(map::get));
     }
 
     @Test
     void createSuccess() {
-        HierarchyMap map = new HierarchyMap();
+        Map<Type<?>, Object> map = new HashMap<>();
         map.put(Type.of(boolean.class), true);
         map.put(Type.of(String.class), "some thing");
         map.put(Type.of(int.class), 42);
 
-        DummyClass obj = factory.create(map, false, 9);
+        DummyClass obj = factory.create(map::get, false, 9);
         Assertions.assertNotNull(obj);
         Assertions.assertEquals("some thing", obj.getStr());
         Assertions.assertFalse(obj.isDebug());

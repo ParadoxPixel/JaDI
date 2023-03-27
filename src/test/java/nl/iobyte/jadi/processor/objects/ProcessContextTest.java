@@ -11,8 +11,7 @@ class ProcessContextTest {
 
     @BeforeEach
     void setUp() {
-        ctx = new ProcessContext("some string", Type.of(String.class), type -> null) {
-        };
+        ctx = new ProcessContext("some string", Type.of(String.class), null);
     }
 
     @Test

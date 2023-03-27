@@ -2,10 +2,10 @@ package nl.iobyte.jadi.objects;
 
 import java.util.HashMap;
 import java.util.List;
-import nl.iobyte.jadi.interfaces.TypeResolver;
+import java.util.function.Function;
 import nl.iobyte.jadi.reflections.Type;
 
-public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolver {
+public class HierarchyMap<T> extends HashMap<Type<?>, T> {
 
     /**
      * Get the closest instance of type
@@ -14,13 +14,27 @@ public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolv
      * @return type instance
      */
     @Override
-    public synchronized Object get(Object key) {
+    public synchronized T get(Object key) {
         return getInternal((Type<?>) key);
     }
 
     @Override
-    public synchronized Object put(Type<?> key, Object value) {
+    public synchronized T put(Type<?> key, T value) {
         return super.put(key, value);
+    }
+
+    @Override
+    public synchronized T computeIfAbsent(Type<?> key, Function<? super Type<?>, ? extends T> mappingFunction) {
+        T obj = super.get(key);
+        if(obj != null)
+            return obj;
+
+        obj = mappingFunction.apply(key);
+        if(obj == null)
+            return null;
+
+        super.put(key, obj);
+        return obj;
     }
 
     /**
@@ -29,12 +43,25 @@ public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolv
      * @param type type
      * @return value
      */
-    private Object getInternal(Type<?> type) {
+    private T getInternal(Type<?> type) {
         type = getClosestType(type);
         if(type == null)
             return null;
 
         return super.get(type);
+    }
+
+    /**
+     * Get all values that can be assigned to type
+     *
+     * @param type type
+     * @return list of values
+     */
+    public List<T> getAssignableValues(Type<?> type) {
+        return keySet().stream()
+            .filter(t -> t.isAssignable(type))
+            .map(super::get)
+            .toList();
     }
 
     /**
@@ -51,12 +78,12 @@ public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolv
     }
 
     /**
-     * Get the closest type found in map.
+     * Get the closest type found in map
      *
      * @param type type
      * @return type
      */
-    public Type<?> getClosestType(Type<?> type) {
+    private Type<?> getClosestType(Type<?> type) {
         if(super.containsKey(type))
             return type;
 
@@ -80,11 +107,6 @@ public class HierarchyMap extends HashMap<Type<?>, Object> implements TypeResolv
         }
 
         return closestType;
-    }
-
-    @Override
-    public synchronized Object apply(Type<?> type) {
-        return this.getInternal(type);
     }
 
 }

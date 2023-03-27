@@ -3,6 +3,7 @@ package nl.iobyte.jadi;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 import lombok.AllArgsConstructor;
 import nl.iobyte.jadi.processor.objects.DummyClass;
 import nl.iobyte.jadi.reflections.Type;
@@ -49,12 +50,42 @@ class JaDITest {
         Assertions.assertNotNull(jadi.resolve(Type.of(DummyClass.class), Duration.ofSeconds(1)));
     }
 
+    @Test
+    void resolveComplex() throws ExecutionException, InterruptedException {
+        CompletableFuture<DummyBuildClass> future = jadi.resolve(Type.of(DummyBuildClass.class));
+        Assertions.assertNotNull(future);
+        Assertions.assertFalse(future.isDone());
+
+        DummyExtendedBuildClass obj = new DummyExtendedBuildClass("nope", false);
+        jadi.bind(Type.of(DummyExtendedBuildClass.class), obj);
+        Assertions.assertEquals(obj, future.get());
+    }
+
+    @Test
+    void supplier() throws ExecutionException, InterruptedException {
+        CompletableFuture<Supplier<DummyClass>> future = jadi.getSupplier(Type.of(DummyClass.class));
+        Assertions.assertNotNull(future);
+        Assertions.assertTrue(future.isDone());
+
+        Supplier<DummyClass> supplier = future.get();
+        Assertions.assertNotNull(supplier);
+        Assertions.assertNotNull(supplier.get());
+    }
+
     @AllArgsConstructor
     public static class DummyBuildClass {
 
         private String str;
 
         private boolean b;
+
+    }
+
+    public static class DummyExtendedBuildClass extends DummyBuildClass {
+
+        public DummyExtendedBuildClass(String str, boolean b) {
+            super(str, b);
+        }
 
     }
 
