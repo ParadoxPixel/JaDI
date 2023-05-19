@@ -1,5 +1,11 @@
 package nl.iobyte.jadi.reflections;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+import net.jodah.expiringmap.ExpiringMap;
+import org.apache.commons.lang3.ClassUtils;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -9,12 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import net.jodah.expiringmap.ExpiringMap;
-import org.apache.commons.lang3.ClassUtils;
 
 @Getter
 @ToString
@@ -23,8 +23,8 @@ public class Type<T> extends TypeElement<Class<T>> {
 
     // Cache
     private static final Map<Class<?>, Type<?>> TYPE_MAP = ExpiringMap.builder()
-        .expiration(5, TimeUnit.MINUTES)
-        .build();
+            .expiration(5, TimeUnit.MINUTES)
+            .build();
 
     // Local
     private final Class<T> type;
@@ -52,8 +52,8 @@ public class Type<T> extends TypeElement<Class<T>> {
      */
     public List<Type<?>> getInterfaceTypes() {
         return Arrays.stream(type.getInterfaces())
-            .map(Type::of)
-            .collect(Collectors.toList());
+                .map(Type::of)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -73,10 +73,10 @@ public class Type<T> extends TypeElement<Class<T>> {
      * @return whether the type can be instantiated
      */
     public boolean isInstantiable() {
-        if(type.isInterface() || Modifier.isAbstract(type.getModifiers()))
+        if (type.isInterface() || Modifier.isAbstract(type.getModifiers()))
             return false;
 
-        if(ClassUtils.isPrimitiveOrWrapper(type))
+        if (ClassUtils.isPrimitiveOrWrapper(type))
             return false;
 
         return !type.getPackageName().startsWith("java.lang");
@@ -111,17 +111,17 @@ public class Type<T> extends TypeElement<Class<T>> {
      * @return depth
      */
     public int getHierarchyDepth(Type<?> type) {
-        if(!type.isAssignable(this))
+        if (!type.isAssignable(this))
             return -1;
 
-        if(this.type.equals(type.type))
+        if (this.type.equals(type.type))
             return 0;
 
         return getAssignableTypes().stream()
-            .map(t -> t.getHierarchyDepth(type) + 1)
-            .filter(i -> i > 0)
-            .min(Integer::compareTo)
-            .orElse(-1);
+                .map(t -> t.getHierarchyDepth(type) + 1)
+                .filter(i -> i > 0)
+                .min(Integer::compareTo)
+                .orElse(-1);
     }
 
     /**
@@ -132,19 +132,20 @@ public class Type<T> extends TypeElement<Class<T>> {
      */
     @SafeVarargs
     public final List<TypeField> getFields(Predicate<TypeField>... filters) {
-        Stream<TypeField> stream = Arrays.stream(type.getDeclaredFields())
-            .map(field -> new TypeField(
-                field,
-                this
-            ));
+        return Arrays.stream(type.getDeclaredFields())
+                .map(field -> new TypeField(
+                        field,
+                        this
+                )).filter(f -> {
+                    if (filters == null)
+                        return true;
 
-        if(filters == null)
-            return stream.collect(Collectors.toList());
+                    for (Predicate<TypeField> filter : filters)
+                        if (!filter.test(f))
+                            return false;
 
-        for(Predicate<TypeField> filter : filters)
-            stream = stream.filter(filter);
-
-        return stream.collect(Collectors.toList());
+                    return true;
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -156,20 +157,21 @@ public class Type<T> extends TypeElement<Class<T>> {
     @SafeVarargs
     public final List<TypeConstructor<T>> getConstructors(Predicate<TypeConstructor<T>>... filters) {
         //noinspection unchecked
-        Stream<TypeConstructor<T>> stream = Arrays.stream(type.getDeclaredConstructors())
-            .map(constructor -> (Constructor<T>) constructor)
-            .map(constructor -> new TypeConstructor<>(
-                constructor,
-                this
-            ));
+        return Arrays.stream(type.getDeclaredConstructors())
+                .map(constructor -> (Constructor<T>) constructor)
+                .map(constructor -> new TypeConstructor<>(
+                        constructor,
+                        this
+                )).filter(c -> {
+                    if (filters == null)
+                        return true;
 
-        if(filters == null)
-            return stream.collect(Collectors.toList());
+                    for (Predicate<TypeConstructor<T>> filter : filters)
+                        if (!filter.test(c))
+                            return false;
 
-        for(Predicate<TypeConstructor<T>> filter : filters)
-            stream = stream.filter(filter);
-
-        return stream.collect(Collectors.toList());
+                    return true;
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -180,19 +182,20 @@ public class Type<T> extends TypeElement<Class<T>> {
      */
     @SafeVarargs
     public final List<TypeMethod> getMethods(Predicate<TypeMethod>... filters) {
-        Stream<TypeMethod> stream = Arrays.stream(type.getDeclaredMethods())
-            .map(field -> new TypeMethod(
-                field,
-                this
-            ));
+        return Arrays.stream(type.getDeclaredMethods())
+                .map(field -> new TypeMethod(
+                        field,
+                        this
+                )).filter(m -> {
+                    if (filters == null)
+                        return true;
 
-        if(filters == null)
-            return stream.collect(Collectors.toList());
+                    for (Predicate<TypeMethod> filter : filters)
+                        if (!filter.test(m))
+                            return false;
 
-        for(Predicate<TypeMethod> filter : filters)
-            stream = stream.filter(filter);
-
-        return stream.collect(Collectors.toList());
+                    return true;
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -207,11 +210,11 @@ public class Type<T> extends TypeElement<Class<T>> {
 
         //noinspection unchecked
         return (Type<T>) TYPE_MAP.computeIfAbsent(
-            originalType,
-            key -> new Type<>(
-                (Class<T>) ClassUtils.primitiveToWrapper(key),
-                key
-            )
+                originalType,
+                key -> new Type<>(
+                        (Class<T>) ClassUtils.primitiveToWrapper(key),
+                        key
+                )
         );
     }
 
